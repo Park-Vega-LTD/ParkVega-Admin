@@ -38,7 +38,7 @@ type Values = {
 function toValues(attraction: Attraction | null): Values {
   return {
     name: attraction?.name ?? "",
-    category: attraction?.category ?? "Slides",
+    category: attraction?.category ?? "Thrill",
     description: attraction?.description ?? "",
     image_url: attraction?.image_url ?? "",
     thrill_level: attraction?.thrill_level ?? "",
@@ -49,7 +49,8 @@ function toValues(attraction: Attraction | null): Values {
   };
 }
 
-const CATEGORIES = ["Slides", "Pools", "Kids", "Relaxation", "Food & drink"];
+// Must match the public site's attraction filter (parkvega-web attractions-filter.tsx).
+const CATEGORIES = ["Thrill", "Family", "Kids", "Relax"];
 const selectClass = "h-10 w-full rounded-md border border-input bg-background px-3 text-sm";
 
 /**

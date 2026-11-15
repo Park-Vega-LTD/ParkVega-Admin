@@ -31,6 +31,83 @@ const SLOTS = [
     help: "Replaces the carousel photos in order: photo 1 goes behind the first headline, and so on. Slides without a photo here keep their built-in one.",
     max: 6,
   },
+  {
+    page: "home",
+    slot: "restaurant",
+    title: "Homepage restaurant photo",
+    help: "The food photo beside the menu highlights in the homepage restaurant section. Empty keeps the built-in jollof and chicken photo.",
+    max: 1,
+  },
+  {
+    page: "birthday-parties",
+    slot: "hero",
+    title: "Birthday parties banner",
+    help: "The big photo at the top of the Birthday parties page, also used when the page is shared. Empty keeps the built-in friends-on-rubber-rings photo.",
+    max: 1,
+  },
+  {
+    page: "birthday-parties",
+    slot: "gallery",
+    title: "Birthday parties photo grid",
+    help: "The row of four photos on the Birthday parties page, in order from left to right. Spots without a photo here keep their built-in one.",
+    max: 4,
+  },
+  {
+    page: "school-excursions",
+    slot: "hero",
+    title: "School excursions banner",
+    help: "The big photo at the top of the School excursions page, also used when the page is shared. Empty keeps the built-in wave pool photo.",
+    max: 1,
+  },
+  {
+    page: "services",
+    slot: "hero",
+    title: "Services banner",
+    help: "The big photo at the top of the Services page, also used when the page is shared. Empty keeps the built-in aerial park photo.",
+    max: 1,
+  },
+  {
+    page: "services",
+    slot: "cabanas",
+    title: "Services cabana photo",
+    help: "The photo beside the Private cabanas showcase on the Services page. Empty keeps the built-in friends-on-rubber-rings photo.",
+    max: 1,
+  },
+  {
+    page: "services",
+    slot: "groups",
+    title: "Services group cards",
+    help: "The photos on the three group cards on the Services page, in this order: 1 Birthday parties, 2 School excursions, 3 Corporate & team days. Cards without a photo here keep their built-in one.",
+    max: 3,
+  },
+  {
+    page: "plan-your-visit",
+    slot: "hero",
+    title: "Plan your visit banner",
+    help: "The big photo at the top of the Plan your visit page, also used when the page is shared. Empty keeps the built-in aerial park photo.",
+    max: 1,
+  },
+  {
+    page: "directions",
+    slot: "hero",
+    title: "Directions banner",
+    help: "The big photo at the top of the Directions page, also used when the page is shared. Empty keeps the built-in wave pool photo.",
+    max: 1,
+  },
+  {
+    page: "restaurants",
+    slot: "header",
+    title: "Restaurants header photos",
+    help: "Up to three photos at the top of the Restaurants page, shown only when fewer than three menu dishes have their own photo; dish photos always come first. The first is also used when the page is shared. Spots without a photo here keep the built-in food photos.",
+    max: 3,
+  },
+  {
+    page: "site",
+    slot: "attraction-fallback",
+    title: "Attraction stand-in photo",
+    help: "Shown on the homepage, the Attractions pages and My Day for any attraction that has no photo of its own. Empty keeps the built-in aerial park photo.",
+    max: 1,
+  },
 ] as const;
 
 type Draft = { media_file_id: string; url: string; alt_text: string };
@@ -128,11 +205,11 @@ function SlotEditor({
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={image.url} alt="" className="h-16 w-24 rounded-lg object-cover" />
               <div className="min-w-48 flex-1 space-y-1">
-                <Label htmlFor={`alt-${slot}-${index}`} className="text-xs">
+                <Label htmlFor={`alt-${page}-${slot}-${index}`} className="text-xs">
                   Description for screen readers
                 </Label>
                 <Input
-                  id={`alt-${slot}-${index}`}
+                  id={`alt-${page}-${slot}-${index}`}
                   maxLength={200}
                   value={image.alt_text}
                   placeholder="e.g. Children cheering under the tipping bucket"
