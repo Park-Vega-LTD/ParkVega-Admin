@@ -2,6 +2,7 @@ import { jwtVerify } from 'jose'
 import { NextRequest, NextResponse } from 'next/server'
 
 import { safeNextPath } from '@/lib/auth-redirect'
+import { canAccess, isStaffRole } from '@/lib/roles'
 import {
   ACCESS_COOKIE,
   REFRESH_COOKIE,
@@ -13,14 +14,6 @@ import {
 } from '@/lib/session-cookies'
 
 const JWT_SECRET_KEY = new TextEncoder().encode(process.env.JWT_SECRET)
-
-// Staff (marketing, park team) manage the CMS. Customer data, money and
-// access control stay admin-only.
-export const ADMIN_ONLY = ['/admin/bookings', '/admin/revenue', '/admin/refunds', '/admin/staff']
-
-function isUnder(path: string, prefix: string) {
-  return path === prefix || path.startsWith(`${prefix}/`)
-}
 
 function redirect(req: NextRequest, destination: string) {
   const url = req.nextUrl.clone()
@@ -48,10 +41,10 @@ async function roleFrom(token: string | undefined): Promise<string | null> {
  *    the response and to this request, so the page or Route Handler running
  *    now sees the new token. This is the only place that refreshes; see
  *    lib/session-cookies.ts for why.
- * 2. Gates pages: every page needs a staff or admin session except /login and
- *    /accept-invite,
- *    and the ADMIN_ONLY sections need admin. BFF routes under /api are left
- *    to the REST API, which enforces roles itself.
+ * 2. Gates pages: every page needs a console session except /login and
+ *    /accept-invite, and each section is limited to the roles in
+ *    SECTION_ROLES (lib/roles.ts). BFF routes under /api are left to the REST
+ *    API, which enforces roles itself.
  */
 export async function proxy(req: NextRequest) {
   const path = req.nextUrl.pathname
@@ -78,7 +71,7 @@ export async function proxy(req: NextRequest) {
     }
   }
 
-  const isStaff = role === 'staff' || role === 'admin'
+  const isStaff = isStaffRole(role)
   let response: NextResponse
 
   if (path.startsWith('/api/') || path === '/accept-invite') {
@@ -91,7 +84,7 @@ export async function proxy(req: NextRequest) {
       : NextResponse.next({ request: { headers: req.headers } })
   } else if (!isStaff) {
     response = redirect(req, `/login?next=${encodeURIComponent(path)}`)
-  } else if (ADMIN_ONLY.some((p) => isUnder(path, p)) && role !== 'admin') {
+  } else if (!canAccess(role, path)) {
     response = redirect(req, '/admin')
   } else {
     // Passing the request headers on makes the cookies set above visible to

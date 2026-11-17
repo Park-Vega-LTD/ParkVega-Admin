@@ -16,7 +16,7 @@ export interface User {
   first_name: string
   last_name: string
   phone_number: string | null
-  role: 'user' | 'staff' | 'admin'
+  role: 'user' | 'staff' | 'pos' | 'cms' | 'admin' | 'superadmin'
   /** System-generated customer ID, e.g. "PVC-7K3Q9X2M". */
   customer_id?: string | null
   /** True for guest customers created by a no-login ticket purchase. */

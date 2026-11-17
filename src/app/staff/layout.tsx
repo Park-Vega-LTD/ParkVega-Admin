@@ -2,20 +2,23 @@ import type { ReactNode } from "react";
 import { redirect } from "next/navigation";
 
 import { SignOutButton } from "@/components/parkvega/sign-out-button";
-import { getSessionRole, isStaffRole } from "@/lib/session";
+import { canAccess, getSessionRole, isStaffRole } from "@/lib/session";
 
 /**
  * Staff tools layout — Server Component.
  *
  * Minimal shell with no admin sidebar, for gate devices. The proxy enforces
- * the `staff`/`admin` role; this re-check is defence-in-depth.
+ * the roles allowed on the gate (lib/roles.ts); this re-check is
+ * defence-in-depth.
  */
 export default async function StaffLayout({
   children,
 }: {
   children: ReactNode;
 }) {
-  if (!isStaffRole(await getSessionRole())) redirect("/login?next=/staff/gate");
+  const role = await getSessionRole();
+  if (!isStaffRole(role)) redirect("/login?next=/staff/gate");
+  if (!canAccess(role, "/staff/gate")) redirect("/admin");
 
   return (
     <div className="min-h-screen bg-muted/30">

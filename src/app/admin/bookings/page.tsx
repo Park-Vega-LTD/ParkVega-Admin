@@ -1,9 +1,8 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 
 import { AdminBookingsTable } from "@/components/parkvega/admin-bookings-table";
 import { serverFetch } from "@/lib/api.server";
-import { getSessionRole } from "@/lib/session";
+import { requireAccess } from "@/lib/session";
 import type { Booking } from "@/types/api";
 
 // Admin data must always reflect the latest server state (bookings change
@@ -31,8 +30,8 @@ export function generateMetadata(): Metadata {
  * an empty list so the table shows its empty-state rather than crashing.
  */
 export default async function AdminBookingsPage() {
-  // Customer booking data is admin-only; staff manage the CMS sections.
-  if ((await getSessionRole()) !== "admin") redirect("/admin");
+  // Customer booking data: admin and point of sale only.
+  await requireAccess("/admin/bookings");
 
   const bookings = await serverFetch<Booking[]>("/bookings", {
     cache: "no-store",

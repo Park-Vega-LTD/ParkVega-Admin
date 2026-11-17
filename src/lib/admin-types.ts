@@ -17,7 +17,7 @@ export interface RevenueReport {
   }[];
 }
 
-export type AccessRole = "user" | "staff" | "admin";
+export type AccessRole = "user" | "staff" | "pos" | "cms" | "admin" | "superadmin";
 
 /** GET /staff, POST /staff, PATCH /staff/:id/role. */
 export interface StaffMember {

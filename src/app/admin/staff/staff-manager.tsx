@@ -38,8 +38,13 @@ const STAFF_KEY = ["admin-staff"];
 const ROLE_LABELS: Record<AccessRole, string> = {
   user: "Visitor (no console access)",
   staff: "Staff",
+  pos: "Point of sale",
+  cms: "Website content",
   admin: "Admin",
+  superadmin: "Superadmin",
 };
+
+const CONSOLE_ROLES = ["staff", "pos", "cms", "admin", "superadmin"] as const;
 
 function fullName(member: Pick<StaffMember, "first_name" | "last_name">) {
   return [member.first_name, member.last_name].filter(Boolean).join(" ");
@@ -64,7 +69,7 @@ function RoleSelect({
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
-        {(includeUser ? (["staff", "admin", "user"] as const) : (["staff", "admin"] as const)).map((role) => (
+        {(includeUser ? [...CONSOLE_ROLES, "user" as const] : CONSOLE_ROLES).map((role) => (
           <SelectItem key={role} value={role}>
             {ROLE_LABELS[role]}
           </SelectItem>

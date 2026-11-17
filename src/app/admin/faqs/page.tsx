@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 
+import { HelpCircle } from "lucide-react";
+
 import { AdminPageHeader, LoadError } from "@/components/parkvega/admin/page-header";
 import { serverFetch } from "@/lib/api.server";
 import type { StaffFaq } from "@/lib/faqs";
@@ -24,6 +26,7 @@ export default async function AdminFaqsPage() {
     <section className="space-y-6">
       <AdminPageHeader
         title="FAQs"
+        icon={HelpCircle}
         description="The questions and answers at the bottom of each website page. Changes go live as soon as you save."
       />
       {error ? <LoadError error={error} /> : <FaqsManager initial={faqs} />}

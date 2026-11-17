@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
 
 import { AdminPageHeader } from "@/components/parkvega/admin/page-header";
-import { getSessionRole } from "@/lib/session";
+import { requireAccess } from "@/lib/session";
 
 import { RefundsManager } from "./refunds-manager";
 
@@ -12,7 +11,7 @@ export const metadata: Metadata = { title: "Refunds | Park Vega Admin" };
 
 export default async function AdminRefundsPage() {
   // Money is admin-only; the proxy enforces this too.
-  if ((await getSessionRole()) !== "admin") redirect("/admin");
+  await requireAccess("/admin/refunds");
 
   return (
     <section className="space-y-6">

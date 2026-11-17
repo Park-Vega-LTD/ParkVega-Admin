@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { apiHeaders } from '@/lib/forwarded'
 import { API_URL } from '@/lib/api-url'
 import { setAuthCookies } from '@/lib/auth'
+import { isStaffRole } from '@/lib/roles'
 import type { User } from '@/types/api'
 
 interface LoginResponseData {
@@ -60,7 +61,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const envelope: RestEnvelope<LoginResponseData> = await apiRes.json()
     const { user, access_token, refresh_token, expires_in } = envelope.data
 
-    if (user.role !== 'staff' && user.role !== 'admin') {
+    if (!isStaffRole(user.role)) {
       // Revoke the refresh token we will not be using.
       await fetch(`${API_URL}/auth/logout`, {
         method: 'POST',
