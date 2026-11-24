@@ -19,7 +19,18 @@ function formatDateTime(iso: string) {
 }
 
 /** What the group asked for, in one line. */
+const TYPE_LABELS: Record<Enquiry["type"], string> = {
+  birthday: "Birthday",
+  school: "School",
+  corporate: "Corporate",
+};
+
 function summary(enquiry: Enquiry) {
+  if (enquiry.type === "corporate") {
+    return [enquiry.organisation, enquiry.package, enquiry.guests != null ? `${enquiry.guests} guests` : null]
+      .filter(Boolean)
+      .join(" · ");
+  }
   if (enquiry.type === "birthday") {
     return [enquiry.package, enquiry.guests != null ? `${enquiry.guests} guests` : null].filter(Boolean).join(" · ");
   }
@@ -46,6 +57,7 @@ export function EnquiriesList() {
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="birthday">Birthday parties</TabsTrigger>
           <TabsTrigger value="school">School excursions</TabsTrigger>
+          <TabsTrigger value="corporate">Corporate &amp; groups</TabsTrigger>
         </TabsList>
       </Tabs>
 
@@ -77,7 +89,7 @@ export function EnquiriesList() {
                 <TableRow key={enquiry.id} className="align-top">
                   <TableCell className="whitespace-nowrap">{formatDateTime(enquiry.created_at)}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{enquiry.type === "birthday" ? "Birthday" : "School"}</Badge>
+                    <Badge variant="outline">{TYPE_LABELS[enquiry.type] ?? enquiry.type}</Badge>
                   </TableCell>
                   <TableCell className="font-medium">{enquiry.name}</TableCell>
                   <TableCell className="whitespace-nowrap">{enquiry.date}</TableCell>

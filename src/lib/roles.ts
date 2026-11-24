@@ -46,6 +46,7 @@ export const SECTION_ROLES: Record<string, readonly ConsoleRole[]> = {
   '/admin/bookings': ['pos', 'admin'],
   '/admin/ticket-products': ['admin'],
   '/admin/revenue': ['admin'],
+  '/admin/analytics': ['admin'],
   '/admin/refunds': ['admin'],
   '/admin/staff': [],
 }

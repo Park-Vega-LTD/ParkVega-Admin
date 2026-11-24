@@ -5,8 +5,8 @@ import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Eye, EyeOff, LogIn } from "lucide-react";
 
-import { Logo } from "@/components/parkvega/logo";
 import { clientFetch } from "@/lib/api.client";
 import { safeNextPath } from "@/lib/auth-redirect";
 import type { User } from "@/types/api";
@@ -43,6 +43,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 function LoginFormInner() {
   const searchParams = useSearchParams();
   const [formError, setFormError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -75,20 +76,31 @@ function LoginFormInner() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col items-center gap-3 text-center">
-        <Logo size="sm" />
-        <h1 className="font-display text-2xl font-semibold tracking-tight">
-          Staff login
-        </h1>
+      {/* Header */}
+      <div className="space-y-1">
+        <p className="text-xs font-semibold uppercase tracking-widest text-primary-ink">
+          Park Vega Account
+        </p>
+        <h2 className="font-display text-2xl font-bold tracking-tight text-foreground">
+          Welcome back
+        </h2>
         <p className="text-sm text-muted-foreground">
           {welcome
             ? "Your password is saved. Sign in to get started."
-            : "Sign in with your Park Vega staff account."}
+            : "Sign in to manage operations and content."}
         </p>
       </div>
 
+      {/* Welcome banner */}
+      {welcome && (
+        <div className="rounded-xl bg-secondary/15 px-4 py-3 text-sm font-medium text-foreground ring-1 ring-secondary/30">
+          🎉 Account activated — you&apos;re all set!
+        </div>
+      )}
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4" noValidate>
+          {/* Email */}
           <FormField
             control={form.control}
             name="email"
@@ -108,6 +120,7 @@ function LoginFormInner() {
             )}
           />
 
+          {/* Password with show/hide toggle */}
           <FormField
             control={form.control}
             name="password"
@@ -115,30 +128,60 @@ function LoginFormInner() {
               <FormItem>
                 <FormLabel>Password</FormLabel>
                 <FormControl>
-                  <Input
-                    type="password"
-                    autoComplete="current-password"
-                    placeholder="••••••••"
-                    {...field}
-                  />
+                  <div className="relative">
+                    <Input
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="current-password"
+                      placeholder="••••••••"
+                      className="pr-10"
+                      {...field}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((v) => !v)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword
+                        ? <EyeOff className="size-4" />
+                        : <Eye className="size-4" />}
+                    </button>
+                  </div>
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <Button type="submit" className="w-full" disabled={isSubmitting}>
-            {isSubmitting ? "Signing in…" : "Sign in"}
-          </Button>
-
+          {/* Error banner */}
           {formError ? (
-            <p
+            <div
               role="alert"
-              className="text-center text-sm font-medium text-destructive"
+              className="flex items-start gap-2.5 rounded-xl bg-destructive/8 px-4 py-3 text-sm text-destructive ring-1 ring-destructive/20"
             >
-              {formError}
-            </p>
+              <span className="mt-px shrink-0">⚠</span>
+              <span>{formError}</span>
+            </div>
           ) : null}
+
+          {/* Submit */}
+          <Button
+            type="submit"
+            className="h-11 w-full gap-2 rounded-xl font-semibold"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <>
+                <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                Signing in…
+              </>
+            ) : (
+              <>
+                <LogIn className="size-4" />
+                Sign in
+              </>
+            )}
+          </Button>
         </form>
       </Form>
     </div>

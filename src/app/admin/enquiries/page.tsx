@@ -13,7 +13,7 @@ export default function AdminEnquiriesPage() {
     <section className="space-y-6">
       <AdminPageHeader
         title="Enquiries"
-        description="Birthday party and school excursion requests from the website, newest first. Reply on WhatsApp."
+        description="Birthday party, school excursion and corporate / group day requests from the website, newest first. Reply on WhatsApp."
       />
       <EnquiriesList />
     </section>

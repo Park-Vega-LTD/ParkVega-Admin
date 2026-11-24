@@ -87,7 +87,7 @@ export interface FoodOrder {
 /** GET /enquiries. */
 export interface Enquiry {
   id: string;
-  type: "birthday" | "school";
+  type: "birthday" | "school" | "corporate";
   name: string;
   whatsapp: string;
   email: string | null;
@@ -115,4 +115,98 @@ export interface MediaFile {
 /** Today's date in West Africa Time (UTC+1, no DST), as YYYY-MM-DD. */
 export function todayWat(): string {
   return new Date(Date.now() + 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
+// ---------------------------------------------------------------------------
+// Analytics (GET /admin/analytics/*). Every figure is from our own records.
+// ---------------------------------------------------------------------------
+
+export type AnalyticsInterval = "day" | "week" | "month";
+
+export interface AnalyticsFigures {
+  grossRevenue: number;
+  refunds: number;
+  netRevenue: number;
+  paidBookings: number;
+  ticketsSold: number;
+  adultTickets: number;
+  childTickets: number;
+  averageOrderValue: number;
+  bookingsCreated: number;
+  bookingsPaidOfCreated: number;
+  bookingConversionRate: number | null;
+  refundCount: number;
+  admissions: number;
+  foodRevenue: number;
+  foodOrders: number;
+  enquiries: number;
+  enquiriesByType: Record<string, number>;
+}
+
+export interface AnalyticsSummary {
+  from: string;
+  to: string;
+  previous: { from: string; to: string };
+  current: AnalyticsFigures;
+  prior: AnalyticsFigures;
+}
+
+export interface AnalyticsPoint {
+  period: string;
+  grossRevenue: number;
+  refunds: number;
+  netRevenue: number;
+  paidBookings: number;
+  ticketsSold: number;
+}
+
+export interface AnalyticsTimeseries {
+  from: string;
+  to: string;
+  interval: AnalyticsInterval;
+  points: AnalyticsPoint[];
+}
+
+export interface AnalyticsProducts {
+  rows: {
+    productId: string | null;
+    kind: "ticket" | "event";
+    name: string;
+    adultTickets: number;
+    childTickets: number;
+    tickets: number;
+    revenue: number;
+    bookings: number;
+  }[];
+}
+
+export interface AnalyticsFunnel {
+  steps: { key: string; label: string; count: number }[];
+}
+
+export interface AnalyticsDemand {
+  byWeekday: { weekday: string; bookings: number; guests: number }[];
+  leadTime: { bucket: string; bookings: number }[];
+  upcoming: { date: string; bookings: number; guests: number }[];
+}
+
+export type AnalyticsExportReport = "timeseries" | "products" | "bookings" | "enquiries" | "attribution";
+
+export type AttributionModel = "first" | "last";
+export type AttributionGroup = "channel" | "source_medium" | "campaign";
+
+/** GET /admin/analytics/attribution: an estimate, unlike the other reports. */
+export interface AnalyticsAttribution {
+  from: string;
+  to: string;
+  model: AttributionModel;
+  groupBy: AttributionGroup;
+  rows: { key: string; label: string; tracked: boolean; bookings: number; revenue: number; leads: number }[];
+  totals: {
+    bookings: number;
+    revenue: number;
+    leads: number;
+    trackedBookingShare: number | null;
+    trackedRevenueShare: number | null;
+  };
 }

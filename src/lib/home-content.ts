@@ -17,7 +17,7 @@ export type AttractionHighlight = {
 
 export const FALLBACK_ATTRACTIONS: AttractionHighlight[] = [
   {
-    name: "Wave Pool",
+    name: "Family Wavepool",
     description: "Half a million gallons of ocean-style waves across 1,500m² – the heart of the park.",
     tags: ["All ages", "1,500m² pool"],
     image: "/photos/wave-pool-tubes.jpg",
@@ -29,7 +29,7 @@ export const FALLBACK_ATTRACTIONS: AttractionHighlight[] = [
     image: "/photos/mat-racer-splash.jpg",
   },
   {
-    name: "Blackhole Combo",
+    name: "Black Hole Slide",
     description: "A steep drop up a near-vertical wall for a moment of weightlessness. Ride it as a pair.",
     tags: ["Min. 120cm", "Double raft"],
     image: "/photos/slide-tower-tubes.jpg",

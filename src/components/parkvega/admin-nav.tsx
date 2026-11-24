@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import * as SheetPrimitive from "@radix-ui/react-dialog";
 import type { LucideIcon } from "lucide-react";
 import {
+  BarChart3,
   CalendarDays,
   ChefHat,
   ChevronRight,
@@ -72,6 +73,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: "Bookings", href: "/admin/bookings", icon: Wallet },
       { label: "Revenue", href: "/admin/revenue", icon: TrendingUp },
+      { label: "Analytics", href: "/admin/analytics", icon: BarChart3 },
       { label: "Refunds", href: "/admin/refunds", icon: Undo2 },
       { label: "Staff", href: "/admin/staff", icon: Users },
     ],
