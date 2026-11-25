@@ -19,7 +19,9 @@ export const REFRESH_MAX_AGE = 7 * 24 * 60 * 60
 
 export const baseCookieOptions = {
   httpOnly: true,
-  secure: true,
+  // Allow cookies on http://localhost in development; production always runs
+  // over HTTPS so the Secure flag is still enforced there.
+  secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax' as const,
   path: '/',
 }

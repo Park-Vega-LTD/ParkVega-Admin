@@ -259,17 +259,20 @@ export function AdminTopBar({ role }: { role: string | null }) {
           ) : null}
         </nav>
 
-        {PUBLIC_SITE_URL ? (
-          <a
-            href={PUBLIC_SITE_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-auto inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border border-border bg-card px-3 text-sm font-semibold text-foreground hover:border-primary hover:text-primary-ink"
-          >
-            <ExternalLink className="size-4" aria-hidden="true" />
-            <span className="hidden sm:inline">View site</span>
-          </a>
-        ) : null}
+        <div className={cn("flex shrink-0 items-center gap-2", PUBLIC_SITE_URL ? "ml-auto" : "ml-auto")}>
+          {PUBLIC_SITE_URL ? (
+            <a
+              href={PUBLIC_SITE_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border border-border bg-card px-3 text-sm font-semibold text-foreground hover:border-primary hover:text-primary-ink"
+            >
+              <ExternalLink className="size-4" aria-hidden="true" />
+              <span className="hidden sm:inline">View site</span>
+            </a>
+          ) : null}
+          <SignOutButton className="h-10 rounded-xl border border-border bg-card px-3 text-sm font-semibold text-foreground hover:border-destructive hover:text-destructive lg:hidden" />
+        </div>
       </div>
     </header>
   );

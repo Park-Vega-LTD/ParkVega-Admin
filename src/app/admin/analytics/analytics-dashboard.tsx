@@ -94,7 +94,7 @@ function autoInterval(days: number): AnalyticsInterval {
 }
 
 const percent = (value: number | null) => (value === null ? "–" : `${Math.round(value * 100)}%`);
-const count = (value: number) => value.toLocaleString("en-NG");
+const count = (value: number | null | undefined) => (value == null ? "–" : value.toLocaleString("en-NG"));
 
 // ---------------------------------------------------------------------------
 // Dashboard
