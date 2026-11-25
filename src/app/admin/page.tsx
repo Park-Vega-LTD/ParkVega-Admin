@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import {
+  AlertTriangle,
   ArrowUpRight,
   CalendarDays,
   ChefHat,
@@ -9,6 +10,7 @@ import {
   Home,
   MessageSquare,
   Newspaper,
+  RefreshCw,
   ScanLine,
   Sparkles,
   TreePalm,
@@ -20,16 +22,11 @@ import { serverFetch } from "@/lib/api.server";
 import { canAccess, getSessionRole } from "@/lib/session";
 import type { Attraction, Booking, Event, Restaurant } from "@/types/api";
 
-// SSR: the admin overview reflects live operational counts that change as
-// admins and visitors mutate data, so render on every request rather than
-// caching (Requirement 11.1).
 export const dynamic = "force-dynamic";
 
 export function generateMetadata(): Metadata {
   return {
-    // Title: 31 chars (<= 60)
     title: "Admin | Park Vega Waterpark",
-    // Description: 118 chars (<= 160)
     description:
       "Park Vega admin overview—at-a-glance counts of attractions, events, bookings and restaurants across the park.",
   };
@@ -37,18 +34,15 @@ export function generateMetadata(): Metadata {
 
 const fetchOpts = { cache: "no-store" } as const;
 
-/** A single count card descriptor rendered on the overview grid. */
 interface CountCard {
   label: string;
-  count: number;
+  count: number | null; // null = fetch failed
   description: string;
   icon: LucideIcon;
   href: string;
-  /** Tailwind classes for the icon tile. */
   tone: string;
 }
 
-/** Shortcuts to the screens staff use most. */
 const SHORTCUTS: { label: string; description: string; href: string; icon: LucideIcon }[] = [
   { label: "Homepage & visit", description: "Hero, opening hours and visit info", href: "/admin/settings", icon: Home },
   { label: "Write a blog post", description: "News and stories for the site", href: "/admin/blog", icon: Newspaper },
@@ -67,24 +61,31 @@ function greeting() {
   return "Good evening";
 }
 
+/** Fetch a resource and return its data, or null on any error. */
+async function safeFetch<T>(path: string): Promise<T | null> {
+  try {
+    return await serverFetch<T>(path, fetchOpts);
+  } catch (err) {
+    console.error(`[admin overview] failed to fetch ${path}:`, err);
+    return null;
+  }
+}
+
 export default async function AdminOverviewPage() {
-  // Fetch every summary collection in parallel. Each fetch degrades to an empty
-  // list on failure so a single unreachable endpoint never crashes the whole
-  // overview — the affected card simply shows 0.
   const [role, attractions, events, bookings, restaurants] = await Promise.all([
     getSessionRole(),
-    serverFetch<Attraction[]>("/attractions", fetchOpts).catch(() => [] as Attraction[]),
-    serverFetch<Event[]>("/events", fetchOpts).catch(() => [] as Event[]),
-    serverFetch<Booking[]>("/bookings", fetchOpts).catch(() => [] as Booking[]),
-    serverFetch<Restaurant[]>("/restaurants", fetchOpts).catch(() => [] as Restaurant[]),
+    safeFetch<Attraction[]>("/attractions"),
+    safeFetch<Event[]>("/events"),
+    safeFetch<Booking[]>("/bookings"),
+    safeFetch<Restaurant[]>("/restaurants"),
   ]);
 
-  // `serverFetch` unwraps the `{ data, meta }` Envelope and returns `data`
-  // (the collection array), so counts are derived from the array length.
+  const anyFailed = [attractions, events, bookings, restaurants].some((r) => r === null);
+
   const cards: CountCard[] = [
     {
       label: "Attractions",
-      count: attractions.length,
+      count: attractions?.length ?? null,
       description: "Rides, pools and zones",
       icon: TreePalm,
       href: "/admin/attractions",
@@ -92,7 +93,7 @@ export default async function AdminOverviewPage() {
     },
     {
       label: "Events",
-      count: events.length,
+      count: events?.length ?? null,
       description: "Scheduled events and special days",
       icon: CalendarDays,
       href: "/admin/events",
@@ -100,7 +101,7 @@ export default async function AdminOverviewPage() {
     },
     {
       label: "Bookings",
-      count: bookings.length,
+      count: bookings?.length ?? null,
       description: "Ticket bookings by visitors",
       icon: Wallet,
       href: "/admin/bookings",
@@ -108,7 +109,7 @@ export default async function AdminOverviewPage() {
     },
     {
       label: "Restaurants",
-      count: restaurants.length,
+      count: restaurants?.length ?? null,
       description: "Dining venues and food outlets",
       icon: UtensilsCrossed,
       href: "/admin/restaurants",
@@ -124,8 +125,40 @@ export default async function AdminOverviewPage() {
     timeZone: "Africa/Lagos",
   }).format(new Date());
 
+  const failedLabels = cards
+    .filter((c) => c.count === null)
+    .map((c) => c.label.toLowerCase())
+    .join(", ");
+
   return (
     <section className="space-y-8">
+      {/* API error banner */}
+      {anyFailed && (
+        <div className="flex items-start justify-between gap-4 rounded-2xl border border-destructive/25 bg-destructive/8 px-5 py-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="mt-0.5 size-5 shrink-0 text-destructive" aria-hidden="true" />
+            <div>
+              <p className="text-sm font-semibold text-destructive">
+                Could not load {failedLabels} from the API
+              </p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Check that <code className="rounded bg-muted px-1 py-0.5 font-mono text-[11px]">PARK_VEGA_API_URL</code> and{" "}
+                <code className="rounded bg-muted px-1 py-0.5 font-mono text-[11px]">JWT_SECRET</code> in{" "}
+                <code className="rounded bg-muted px-1 py-0.5 font-mono text-[11px]">.env.local</code> match your running API, then reload.
+              </p>
+            </div>
+          </div>
+          <a
+            href="/admin"
+            className="flex shrink-0 items-center gap-1.5 rounded-lg border border-border bg-card px-3 py-1.5 text-xs font-semibold text-foreground shadow-sm transition-colors hover:bg-muted"
+          >
+            <RefreshCw className="size-3.5" aria-hidden="true" />
+            Reload
+          </a>
+        </div>
+      )}
+
+      {/* Hero header */}
       <header className="relative overflow-hidden rounded-3xl bg-deep px-6 py-8 text-white shadow-[var(--shadow-card)] sm:px-10 sm:py-10">
         <div
           className="pointer-events-none absolute -right-16 -top-24 size-72 rounded-full bg-primary/35 blur-3xl"
@@ -160,44 +193,52 @@ export default async function AdminOverviewPage() {
         </div>
       </header>
 
+      {/* Count cards */}
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {cards.map((card) => {
           const Icon = card.icon;
           const linked = canAccess(role, card.href);
+          const failed = card.count === null;
           const body = (
             <>
               <div className="flex items-start justify-between gap-3">
                 <span className={`grid size-11 place-items-center rounded-2xl ${card.tone}`}>
                   <Icon className="size-5" aria-hidden="true" />
                 </span>
-                {linked ? (
+                {linked && !failed ? (
                   <ArrowUpRight
                     className="size-5 text-muted-foreground/50 transition-colors group-hover:text-primary-ink"
                     aria-hidden="true"
                   />
                 ) : null}
+                {failed ? (
+                  <AlertTriangle className="size-4 text-destructive/60" aria-hidden="true" />
+                ) : null}
               </div>
-              <p className="mt-5 font-display text-4xl font-bold tracking-tight text-deep">
-                {card.count.toLocaleString("en-GB")}
+              <p className={`mt-5 font-display text-4xl font-bold tracking-tight ${failed ? "text-muted-foreground/40" : "text-deep"}`}>
+                {failed ? "—" : (card.count ?? 0).toLocaleString("en-GB")}
               </p>
               <p className="mt-1 text-sm font-semibold text-foreground">{card.label}</p>
-              <p className="text-xs text-muted-foreground">{card.description}</p>
+              <p className="text-xs text-muted-foreground">
+                {failed ? "Could not load" : card.description}
+              </p>
             </>
           );
           const className =
             "group rounded-2xl border border-border/70 bg-card p-5 shadow-[var(--shadow-card)] transition-[translate,border-color] duration-200";
-          return linked ? (
+          return linked && !failed ? (
             <Link key={card.label} href={card.href} className={`${className} hover:-translate-y-0.5 hover:border-primary/60`}>
               {body}
             </Link>
           ) : (
-            <div key={card.label} className={className}>
+            <div key={card.label} className={`${className} ${failed ? "opacity-60" : ""}`}>
               {body}
             </div>
           );
         })}
       </div>
 
+      {/* Shortcuts */}
       {shortcuts.length > 0 ? (
         <div className="space-y-4">
           <h2 className="font-display text-xl font-semibold text-deep">Jump back in</h2>
